@@ -21,8 +21,9 @@ pipeline {
         }
         stage('Echo POM Version') {
             steps {
-                dir('campers-backend-main'){
+                dir('DevOps_Project'){
                 script {
+                    //variable yjib fel version mta3 pom.xml
                     env.POM_VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true)
                     echo "POM Version: ${env.POM_VERSION}"
                 }
@@ -31,22 +32,25 @@ pipeline {
             }
         }
         stage('Code Compile') {
+            //ychef l code ycompili w ygeneri les fichiers .class
             steps {
-                dir('campers-backend-main') {
+                dir('DevOps_Project') {
                     sh 'mvn clean compile'
                 }
             }
         }
         stage('Unit Test') {
+            //yexecuti les test unitaires
             steps {
-                dir('campers-backend-main') {
+                dir('DevOps_Project') {
                     sh "mvn test"
                 }
             }
         }
         stage('SonarQube Analysis') {
+            //yexecuti l'analyse statique mta3 l code
             steps {
-                dir('campers-backend-main') {
+                dir('DevOps_Project') {
                     script {
                         withSonarQubeEnv() {
                             sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Devops_project -Dsonar.projectName='Devops_project'"
@@ -55,9 +59,10 @@ pipeline {
                 }
             }
         }
+        // nasn3ou jar mta3 l code w n7otou fel nexus
         stage('Deploy to Maven Repository') {
             steps {
-                dir('campers-backend-main') {
+                dir('DevOps_Project') {
                     script {
                         echo "POM Version: ${env.POM_VERSION}"
                         if (POM_VERSION.endsWith('-SNAPSHOT')) {
@@ -76,7 +81,7 @@ pipeline {
         stage('Build and Push Image') {
             steps {
                 script {
-                    dir('campers-backend-main') {
+                    dir('DevOps_Project') {
                         sh """
                             echo "Building Docker image with the following parameters:"
                             echo "Version: ${env.POM_VERSION}"
