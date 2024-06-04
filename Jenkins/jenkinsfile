@@ -53,7 +53,7 @@ pipeline {
                 dir('DevOps_Project') {
                     script {
                         withSonarQubeEnv() {
-                            sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Devops_project -Dsonar.projectName='Devops_project'"
+                            sh "mvn clean verify sonar:sonar -Dsonar.projectKey=sonar -Dsonar.projectName='sonar'"
                         }
                     }
                 }
