@@ -5,9 +5,9 @@ pipeline {
         maven "MAVEN_HOME"
     }
     environment {
-        DOCKER_IMAGE_NAME = 'ghassen52/devops_project'
-        DOCKER_HUB_USERNAME = 'ghassen52'
-        DOCKER_HUB_PASSWORD = 'dckr_pat_97iXDGLkPCUFhZM-MBG52yGRR9E'
+        DOCKER_IMAGE_NAME = 'balssem146/dokerep'
+        DOCKER_HUB_USERNAME = 'balssem146'
+        DOCKER_HUB_PASSWORD = 'dckr_pat_J01vsDIkeVfBT8k8fNltQr_JN8g'
         NEXUS_SNAPSHOT_URL = 'http://localhost:8081/repository/maven-snapshots/'
         NEXUS_RELEASE_URL = 'http://localhost:8081/repository/maven-releases/'
         GROUP_ID = 'tn.esprit'
@@ -78,21 +78,16 @@ pipeline {
                 }
             }
         }
+        //n7otou l image docker fel docker hub
         stage('Build and Push Image') {
             steps {
                 script {
                     dir('DevOps_Project') {
-                        sh """
-                            echo "Building Docker image with the following parameters:"
-                            echo "Version: ${env.POM_VERSION}"
-                            echo "NEXUS_URL: ${env.NEXUS_SNAPSHOT_URL}"
-                            echo "GROUP_ID: ${env.GROUP_ID}"
-                            echo "ARTIFACT_ID: ${env.ARTIFACT_ID}"
-                            echo "DOCKER_IMAGE_NAME: ${DOCKER_IMAGE_NAME}"
-                            docker build --build-arg HOST_IP="nexus" --build-arg NEXUS_PORT="8081" --build-arg VERSION="${env.POM_VERSION}" --build-arg NEXUS_URL="${env.NEXUS_SNAPSHOT_URL}" --build-arg GROUP_ID="${env.GROUP_ID}" --build-arg ARTIFACT_ID="${env.ARTIFACT_ID}" -t "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}" .
-                            docker login -u "${env.DOCKER_HUB_USERNAME}" -p "${env.DOCKER_HUB_PASSWORD}"
-                            docker push "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}"
-                        """
+                         sh '''
+                        docker build -t ${DOCKER_IMAGE_NAME} .
+                        docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
+                        docker push ${DOCKER_IMAGE_NAME}
+                    '''
                     }
                 }
             }
