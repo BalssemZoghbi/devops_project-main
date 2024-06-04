@@ -4,7 +4,7 @@ services:
   sonarqube:
     image: sonarqube:latest
     ports:
-      - "9002:9000"
+      - "9000:9000"
     volumes:
       - ./volumes/sonarqube_data:/opt/sonarqube/data
       - ./volumes/sonarqube_logs:/opt/sonarqube/logs
@@ -18,16 +18,10 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ./volumes/sonatype_work:/sonatype-work
-      - ./volumes/nexus_data:/nexus-data
+      - ./volumes/nexus_data:/sonatype-work
     networks:
       - devops_network
 
 networks:
   devops_network:
     external: true
-
-volumes:
-  jenkins_home:
-  nexus_data:
-  mysql_data:

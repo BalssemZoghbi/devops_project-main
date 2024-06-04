@@ -12,7 +12,7 @@ scrape_configs:
       - targets: ['sonarqube:9000']
     basic_auth:
       username: "admin"
-      password: "adminsonar"
+      password: "adminb"
   - job_name: 'nexus'
     static_configs:
       - targets: ['nexus:8081']
