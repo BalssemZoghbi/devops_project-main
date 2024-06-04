@@ -2,7 +2,7 @@ pipeline {
     agent any
     tools {
         jdk "JAVA_HOME"
-        maven "MAVEN_HOME"
+        maven "M2_HOME"
     }
     environment {
         DOCKER_IMAGE_NAME = 'balssem146/dokerep'
