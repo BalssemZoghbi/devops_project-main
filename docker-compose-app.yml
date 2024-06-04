@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3307:3306"
+    networks:
+      - app_network
+    volumes:
+      - ./volumes/mysql_data:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "" 
+    ports:
+      - "8084:80"
+    networks:
+      - app_network
+    depends_on:
+      - mysql
+
+  spring-app:
+    image: ghassen52/devops_project 
+    ports:
+      - "8085:8080"
+    environment:
+      spring.datasource.url: "jdbc:mysql://mysql:3306/springdb?createDatabaseIfNotExist=true"
+      server.port: 8080
+      spring.datasource.username: root
+      spring.datasource.password: ""
+    networks:
+      - app_network
+    depends_on:
+      - mysql
+
+
+networks:
+  devops_network:
+    external: true

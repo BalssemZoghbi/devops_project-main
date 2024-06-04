@@ -1,0 +1,99 @@
+pipeline {
+    agent any
+    tools {
+        jdk "JAVA_HOME"
+        maven "MAVEN_HOME"
+    }
+    environment {
+        DOCKER_IMAGE_NAME = 'ghassen52/devops_project'
+        DOCKER_HUB_USERNAME = 'ghassen52'
+        DOCKER_HUB_PASSWORD = 'dckr_pat_97iXDGLkPCUFhZM-MBG52yGRR9E'
+        NEXUS_SNAPSHOT_URL = 'http://localhost:8081/repository/maven-snapshots/'
+        NEXUS_RELEASE_URL = 'http://localhost:8081/repository/maven-releases/'
+        GROUP_ID = 'tn.esprit'
+        ARTIFACT_ID = 'DevOps_Project'
+    }
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/ghassen-oueslati/devops_project'
+            }
+        }
+        stage('Echo POM Version') {
+            steps {
+                dir('campers-backend-main'){
+                script {
+                    env.POM_VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true)
+                    echo "POM Version: ${env.POM_VERSION}"
+                }
+            }
+
+            }
+        }
+        stage('Code Compile') {
+            steps {
+                dir('campers-backend-main') {
+                    sh 'mvn clean compile'
+                }
+            }
+        }
+        stage('Unit Test') {
+            steps {
+                dir('campers-backend-main') {
+                    sh "mvn test"
+                }
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                dir('campers-backend-main') {
+                    script {
+                        withSonarQubeEnv() {
+                            sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Devops_project -Dsonar.projectName='Devops_project'"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Deploy to Maven Repository') {
+            steps {
+                dir('campers-backend-main') {
+                    script {
+                        echo "POM Version: ${env.POM_VERSION}"
+                        if (POM_VERSION.endsWith('-SNAPSHOT')) {
+                            sh '''
+                                mvn clean deploy -DskipTests -P nexus-deploy-snapshots -s settings.xml
+                            '''
+                        } else {
+                            sh '''
+                                mvn clean deploy -DskipTests -P nexus-deploy-releases -s settings.xml
+                            ''' 
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build and Push Image') {
+            steps {
+                script {
+                    dir('campers-backend-main') {
+                        sh """
+                            echo "Building Docker image with the following parameters:"
+                            echo "Version: ${env.POM_VERSION}"
+                            echo "NEXUS_URL: ${env.NEXUS_SNAPSHOT_URL}"
+                            echo "GROUP_ID: ${env.GROUP_ID}"
+                            echo "ARTIFACT_ID: ${env.ARTIFACT_ID}"
+                            echo "DOCKER_IMAGE_NAME: ${DOCKER_IMAGE_NAME}"
+                            docker build --build-arg HOST_IP="nexus" --build-arg NEXUS_PORT="8081" --build-arg VERSION="${env.POM_VERSION}" --build-arg NEXUS_URL="${env.NEXUS_SNAPSHOT_URL}" --build-arg GROUP_ID="${env.GROUP_ID}" --build-arg ARTIFACT_ID="${env.ARTIFACT_ID}" -t "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}" .
+                            docker login -u "${env.DOCKER_HUB_USERNAME}" -p "${env.DOCKER_HUB_PASSWORD}"
+                            docker push "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}"
+                        """
+                    }
+                }
+            }
+        }
+
+
+
+    }
+}
