@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/BalssemZoghbi/devops_project-main'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/BalssemZoghbi/devops_project-main/tree/main/campers-backend-main'
             }
         }
         stage('Echo POM Version') {
