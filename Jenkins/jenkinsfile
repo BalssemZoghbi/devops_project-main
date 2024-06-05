@@ -16,14 +16,13 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/BalssemZoghbi/devops_project-main/tree/main/campers-backend-main'
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/BalssemZoghbi/devops_project-main'
             }
         }
         stage('Echo POM Version') {
             steps {
-                dir('DevOps_Project'){
+                dir('campers-backend-main'){
                 script {
-                    //variable yjib fel version mta3 pom.xml
                     env.POM_VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true)
                     echo "POM Version: ${env.POM_VERSION}"
                 }
@@ -32,25 +31,22 @@ pipeline {
             }
         }
         stage('Code Compile') {
-            //ychef l code ycompili w ygeneri les fichiers .class
             steps {
-                dir('DevOps_Project') {
+                dir('campers-backend-main') {
                     sh 'mvn clean compile'
                 }
             }
         }
         stage('Unit Test') {
-            //yexecuti les test unitaires
             steps {
-                dir('DevOps_Project') {
+                dir('campers-backend-main') {
                     sh "mvn test"
                 }
             }
         }
         stage('SonarQube Analysis') {
-            //yexecuti l'analyse statique mta3 l code
             steps {
-                dir('DevOps_Project') {
+                dir('campers-backend-main') {
                     script {
                         withSonarQubeEnv() {
                             sh "mvn clean verify sonar:sonar -Dsonar.projectKey=sonar -Dsonar.projectName='sonar'"
@@ -59,10 +55,9 @@ pipeline {
                 }
             }
         }
-        // nasn3ou jar mta3 l code w n7otou fel nexus
         stage('Deploy to Maven Repository') {
             steps {
-                dir('DevOps_Project') {
+                dir('campers-backend-main') {
                     script {
                         echo "POM Version: ${env.POM_VERSION}"
                         if (POM_VERSION.endsWith('-SNAPSHOT')) {
@@ -78,16 +73,17 @@ pipeline {
                 }
             }
         }
-        //n7otou l image docker fel docker hub
         stage('Build and Push Image') {
             steps {
                 script {
-                    dir('DevOps_Project') {
-                         sh '''
-                        docker build -t ${DOCKER_IMAGE_NAME} .
-                        docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
-                        docker push ${DOCKER_IMAGE_NAME}
-                    '''
+                    dir('campers-backend-main') {
+                    sh """
+                            docker build -t "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}" .
+                            docker tag "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}" "${env.DOCKER_IMAGE_NAME}:latest"
+                            docker login -u "${env.DOCKER_HUB_USERNAME}" -p "${env.DOCKER_HUB_PASSWORD}"
+                            docker push "${env.DOCKER_IMAGE_NAME}:${env.POM_VERSION}"
+                            docker push "${env.DOCKER_IMAGE_NAME}:latest"
+                        """
                     }
                 }
             }
