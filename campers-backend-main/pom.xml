@@ -171,7 +171,6 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-
     <distributionManagement>
         <snapshotRepository>
             <id>snapshots</id>
@@ -182,8 +181,8 @@
             <url>http://localhost:8081/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
-    
-  <profiles>
+
+    <profiles>
         <profile>
             <id>nexus-deploy-snapshots</id>
             <build>
