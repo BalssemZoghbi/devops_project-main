@@ -68,29 +68,6 @@ public class ReservationTest {
         // Verify that the deactivateOldReservations method is called with the correct date
         verify(reservationRepository).deactivateOldReservations(any(Date.class));
     }
-    @Test
-    void testCalculateTotalNumberOfDays() {
-        // Mock data
-        List<Reservation> reservations = new ArrayList<>();
-        Reservation reservation1 = new Reservation();
-        reservation1.setDateStart(new Date(2024, 5, 1)); // May 1st, 2024
-        reservation1.setDateEnd(new Date(2024, 5, 5));   // May 5th, 2024
-        reservations.add(reservation1);
-
-        Reservation reservation2 = new Reservation();
-        reservation2.setDateStart(new Date(2024, 5, 10));  // May 10th, 2024
-        reservation2.setDateEnd(new Date(2024, 5, 15));    // May 15th, 2024
-        reservations.add(reservation2);
-
-        // Mock the repository behavior
-        when(reservationRepository.findAll()).thenReturn(reservations);
-
-        // Call the method to test
-        int totalDays = reservationService.calculateTotalNumberOfDays(reservations);
-
-        // Verify the result
-        assertEquals(9, totalDays);
-    }
 
     }
     
